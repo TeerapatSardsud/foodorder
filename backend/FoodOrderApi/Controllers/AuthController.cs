@@ -4,6 +4,7 @@ using System.Text;
 using FoodOrderApi.Data;
 using FoodOrderApi.DTOs;
 using FoodOrderApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
         _secret = config["Jwt:Secret"]!;
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
     {
@@ -51,6 +53,7 @@ public class AuthController : ControllerBase
         });
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req)
     {

@@ -1,10 +1,23 @@
-<p-menubar [model]="menuItems()">
+<p-menubar [model]="menuItems">
   <ng-template pTemplate="start">
     <span class="text-xl font-bold mr-4">🍔 FoodOrder</span>
   </ng-template>
-
+ 
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-3">
+ 
+      <!-- Cart button (เหมือนเดิม) -->
+      <a routerLink="/checkout" class="p-button p-button-text p-button-rounded relative"
+         style="text-decoration:none">
+        <i class="pi pi-shopping-cart text-xl"></i>
+        <span *ngIf="(cartCount$ | async)! > 0"
+          class="p-badge p-badge-danger"
+          style="position:absolute;top:-4px;right:-4px;font-size:10px;min-width:18px;height:18px;line-height:18px">
+          {{ cartCount$ | async }}
+        </span>
+      </a>
+ 
+      <!-- User info + Logout (แสดงเฉพาะตอน login แล้ว) -->
       <ng-container *ngIf="auth.isLoggedIn()">
         <div class="flex align-items-center gap-2">
           <p-avatar
@@ -30,8 +43,9 @@
           (onClick)="auth.logout()"
         ></p-button>
       </ng-container>
+ 
     </div>
   </ng-template>
 </p-menubar>
-
+ 
 <router-outlet />
