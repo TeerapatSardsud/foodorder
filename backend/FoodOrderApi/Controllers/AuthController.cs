@@ -15,9 +15,13 @@ namespace FoodOrderApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private const string Secret = "foodorder-super-secret-key-2026!!";
+    private readonly string _secret;
 
-    public AuthController(AppDbContext db) => _db = db;
+    public AuthController(AppDbContext db, IConfiguration config)
+    {
+        _db     = db;
+        _secret = config["Jwt:Secret"]!;
+    }
 
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
@@ -30,7 +34,7 @@ public class AuthController : ControllerBase
             FullName     = req.FullName,
             Email        = req.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-            Role         = "Customer",
+            Role         = "User",
             CreatedAt    = DateTime.UtcNow
         };
 
@@ -39,6 +43,7 @@ public class AuthController : ControllerBase
 
         return Ok(new AuthResponse
         {
+            Id       = user.Id,
             Token    = GenerateToken(user),
             FullName = user.FullName,
             Email    = user.Email,
@@ -56,6 +61,7 @@ public class AuthController : ControllerBase
 
         return Ok(new AuthResponse
         {
+            Id       = user.Id,
             Token    = GenerateToken(user),
             FullName = user.FullName,
             Email    = user.Email,
@@ -63,9 +69,9 @@ public class AuthController : ControllerBase
         });
     }
 
-    private static string GenerateToken(User user)
+    private string GenerateToken(User user)
     {
-        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret));
+        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {

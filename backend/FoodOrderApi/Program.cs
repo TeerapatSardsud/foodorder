@@ -13,14 +13,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=foodorder.db"));
 
+var jwtSecret = builder.Configuration["Jwt:Secret"]!;
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes("foodorder-super-secret-key-2026!!")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
             ValidateIssuer   = false,
             ValidateAudience = false
         };
@@ -53,6 +54,31 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    if (!db.Users.Any(u => u.Role == "Admin"))
+    {
+        db.Users.Add(new FoodOrderApi.Models.User
+        {
+            FullName     = "Admin",
+            Email        = "admin@foodorder.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@1234"),
+            Role         = "Admin",
+            CreatedAt    = DateTime.UtcNow
+        });
+        db.SaveChanges();
+    }
+    if (!db.Users.Any(u => u.Role == "User"))
+    {
+        db.Users.Add(new FoodOrderApi.Models.User
+        {
+            FullName     = "User",
+            Email        = "user@foodorder.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("User@1234"),
+            Role         = "User",
+            CreatedAt    = DateTime.UtcNow
+        });
+        db.SaveChanges();
+    }
 }
 
 app.Run("http://localhost:5000");

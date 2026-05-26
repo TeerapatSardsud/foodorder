@@ -1,6 +1,7 @@
 using FoodOrderApi.Data;
 using FoodOrderApi.DTOs;
 using FoodOrderApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace FoodOrderApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext _db;

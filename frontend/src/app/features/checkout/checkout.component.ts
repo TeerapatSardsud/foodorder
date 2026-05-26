@@ -9,7 +9,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { CartService, CartItem } from '../../core/services/cart.service';
 import { OrderService, ORDER_TYPE_OPTIONS } from '../../core/services/order.service';
-import { UserService, User } from '../../core/services/user.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-checkout',
@@ -73,14 +73,6 @@ import { UserService, User } from '../../core/services/user.service';
           <span class="font-semibold">ข้อมูลการสั่ง</span>
 
           <div class="field m-0">
-            <label class="font-medium block mb-1 text-sm">ลูกค้า *</label>
-            <p-dropdown [(ngModel)]="selectedCustomerId"
-              [options]="customers" optionLabel="fullName" optionValue="id"
-              placeholder="เลือกลูกค้า" styleClass="w-full">
-            </p-dropdown>
-          </div>
-
-          <div class="field m-0">
             <label class="font-medium block mb-1 text-sm">ประเภทออเดอร์</label>
             <p-dropdown [(ngModel)]="selectedOrderType"
               [options]="typeOptions" optionLabel="label" optionValue="value"
@@ -102,7 +94,6 @@ import { UserService, User } from '../../core/services/user.service';
           icon="pi pi-check"
           styleClass="w-full"
           [loading]="submitting"
-          [disabled]="!selectedCustomerId"
           (onClick)="confirmOrder()">
         </p-button>
 
@@ -114,16 +105,14 @@ import { UserService, User } from '../../core/services/user.service';
 export class CheckoutComponent implements OnInit {
   private cartService  = inject(CartService);
   private orderService = inject(OrderService);
-  private userService  = inject(UserService);
+  private authService  = inject(AuthService);
   private router       = inject(Router);
   private toast        = inject(MessageService);
 
   cartItems: CartItem[] = [];
   total = 0;
-  customers: User[]     = [];
   typeOptions           = ORDER_TYPE_OPTIONS;
 
-  selectedCustomerId: number | null = null;
   selectedOrderType = 0;
   description       = '';
   submitting        = false;
@@ -133,7 +122,6 @@ export class CheckoutComponent implements OnInit {
       this.cartItems = items;
       this.total = items.reduce((s, i) => s + i.menuItem.price * i.quantity, 0);
     });
-    this.userService.getAll().subscribe(u => this.customers = u);
   }
 
   increaseQty(item: CartItem) {
@@ -151,13 +139,14 @@ export class CheckoutComponent implements OnInit {
   back() { this.router.navigate(['/menu']); }
 
   confirmOrder() {
-    if (!this.selectedCustomerId) return;
+    const customerId = this.authService.currentUser()?.id;
+    if (!customerId) return;
     this.submitting = true;
 
     this.orderService.create({
       description: this.description || 'Order from menu',
       orderType:   this.selectedOrderType,
-      customerId:  this.selectedCustomerId,
+      customerId,
       items: this.cartItems.map(i => ({
         menuItemId: i.menuItem.id,
         quantity:   i.quantity,

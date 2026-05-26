@@ -34,13 +34,6 @@ public class AppDbContext : DbContext
             .Property(o => o.OrderType)
             .HasConversion<string>();
 
-        // Seed Users (no navigation props!)
-        modelBuilder.Entity<User>().HasData(
-            new User { Id = 1, FullName = "Alice Johnson", Email = "alice@example.com", Role = "Customer", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new User { Id = 2, FullName = "Bob Smith",    Email = "bob@example.com",   Role = "Customer", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new User { Id = 3, FullName = "Carol White",  Email = "carol@example.com", Role = "Customer", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
-        );
-
         // Seed MenuItems
         modelBuilder.Entity<MenuItem>().HasData(
             new MenuItem { Id = 1, Name = "Burger Classic",  Description = "Beef patty with lettuce",    Price = 120, Category = "Burger", IsAvailable = true },

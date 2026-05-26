@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 
 export interface AuthUser {
+  id: number;
   token: string;
   fullName: string;
   email: string;
@@ -45,6 +46,21 @@ export class AuthService {
 
   private loadUser(): AuthUser | null {
     const raw = localStorage.getItem('auth_user');
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const user: AuthUser = JSON.parse(raw);
+    if (!user.id || this.isTokenExpired(user.token)) {
+      localStorage.removeItem('auth_user');
+      return null;
+    }
+    return user;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
   }
 }
