@@ -2,6 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
+import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
@@ -12,16 +13,16 @@ import { AuthService } from './core/services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, MenubarModule, ButtonModule, TagModule, AvatarModule],
+  imports: [CommonModule, RouterModule, MenubarModule, BadgeModule, ButtonModule, TagModule, AvatarModule],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
   private cartService = inject(CartService);
-  private authService = inject(AuthService);
+  auth = inject(AuthService);
   cartCount$ = this.cartService.count$;
 
   menuItems = computed<MenuItem[]>(() => {
-    const isAdmin = this.authService.isAdmin();
+    const isAdmin = this.auth.isAdmin();
     return [
       { label: 'Menu',   icon: 'pi pi-fw pi-book', routerLink: ['/menu'] },
       { label: 'Orders', icon: 'pi pi-fw pi-list', routerLink: ['/orders'] },
@@ -29,5 +30,10 @@ export class AppComponent {
         { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
       ] : []),
     ];
+  });
+
+  initials = computed(() => {
+    const name = this.auth.currentUser()?.fullName ?? '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   });
 }
