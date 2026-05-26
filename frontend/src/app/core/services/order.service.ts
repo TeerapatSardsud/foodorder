@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Order {
   id: number;
@@ -62,7 +63,7 @@ export const STATUS_SEVERITY: Record<string, string> = {
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private readonly http    = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:5000/api/orders';
+  private readonly baseUrl = `${environment.apiUrl}/orders`;
 
   getAll(): Observable<Order[]>                              { return this.http.get<Order[]>(this.baseUrl); }
   getById(id: number): Observable<Order>                    { return this.http.get<Order>(`${this.baseUrl}/${id}`); }
