@@ -1,0 +1,14 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>🍔 Food Order</h2>
+    <h3>Register</h3>
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <input [(ngModel)]="fullName" placeholder="Full Name"  type="text"     />
+    <input [(ngModel)]="email"    placeholder="Email"      type="email"    />
+    <input [(ngModel)]="password" placeholder="Password"   type="password" />
+    <button (click)="register()" [disabled]="loading">
+      {{ loading ? 'Creating account...' : 'Register' }}
+    </button>
+    <p>Already have an account? <a routerLink="/login">Login</a></p>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="p-4">
+  <h1 class="text-2xl font-bold mb-1">Dashboard</h1>
+  <p class="text-color-secondary mb-4">Food Order System Overview</p>
+  <ng-container *ngIf="summary; else loading">
+    <div class="grid">
+      <div class="col-12 md:col-6 lg:col-3" *ngFor="let c of cards">
+        <p-card styleClass="h-full">
+          <div class="flex align-items-center justify-content-between">
+            <div>
+              <p class="text-color-secondary text-sm m-0">{{ c.label }}</p>
+              <p class="text-3xl font-bold m-0 mt-1" [style.color]="c.color">{{ c.prefix }}{{ c.value | number }}</p>
+            </div>
+            <i [class]="'pi ' + c.icon" [style.color]="c.color" style="font-size:2rem;opacity:0.6"></i>
+          </div>
+        </p-card>
+      </div>
+      <div class="col-12 md:col-6">
+        <p-card header="Orders by Status">
+          <p-chart type="doughnut" [data]="statusChart" [options]="chartOpts"></p-chart>
+        </p-card>
+      </div>
+      <div class="col-12 md:col-6">
+        <p-card header="Orders by Type">
+          <p-chart type="bar" [data]="typeChart" [options]="chartOpts"></p-chart>
+        </p-card>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #loading>
+    <div class="grid">
+      <div class="col-12 md:col-3" *ngFor="let i of [1,2,3,4]">
+        <p-skeleton height="100px" borderRadius="8px"></p-skeleton>
+      </div>
+    </div>
+  </ng-template>
+</div>

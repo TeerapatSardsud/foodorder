@@ -11,32 +11,7 @@ import { UserService, User } from '../../../core/services/user.service';
   selector: 'app-order-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, DropdownModule, InputTextareaModule, ButtonModule],
-  template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-column gap-3 p-2">
-      <div class="field">
-        <label class="font-medium block mb-1">Description *</label>
-        <textarea pInputTextarea formControlName="description" rows="2" class="w-full" placeholder="e.g. Table 5 - no spicy"></textarea>
-        <small class="text-red-500" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">Description is required</small>
-      </div>
-      <div class="field" *ngIf="!order">
-        <label class="font-medium block mb-1">Customer *</label>
-        <p-dropdown formControlName="customerId" [options]="customers" optionLabel="fullName" optionValue="id" placeholder="Select customer" styleClass="w-full"></p-dropdown>
-        <small class="text-red-500" *ngIf="form.get('customerId')?.invalid && form.get('customerId')?.touched">Customer is required</small>
-      </div>
-      <div class="field">
-        <label class="font-medium block mb-1">Order Type</label>
-        <p-dropdown formControlName="orderType" [options]="typeOptions" optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
-      </div>
-      <div class="field" *ngIf="order">
-        <label class="font-medium block mb-1">Status</label>
-        <p-dropdown formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
-      </div>
-      <div class="flex justify-content-end gap-2 mt-2">
-        <p-button label="Cancel" severity="secondary" [outlined]="true" type="button" (onClick)="cancelled.emit()"></p-button>
-        <p-button [label]="order ? 'Save Changes' : 'Create Order'" type="submit" [loading]="saving"></p-button>
-      </div>
-    </form>
-  `
+  templateUrl: './order-form.component.html'
 })
 export class OrderFormComponent implements OnInit {
   @Input() order: Order | null = null;

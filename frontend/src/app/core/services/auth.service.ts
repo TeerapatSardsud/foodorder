@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
@@ -13,9 +14,11 @@ export interface AuthUser {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http   = inject(HttpClient);
-  private readonly router = inject(Router);
-  private readonly base   = 'http://localhost:5000/api/auth';
+  private readonly http       = inject(HttpClient);
+  private readonly router     = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly base       = 'http://localhost:5000/api/auth';
+  private get isBrowser()     { return isPlatformBrowser(this.platformId); }
 
   currentUser = signal<AuthUser | null>(this.loadUser());
 
@@ -30,7 +33,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('auth_user');
+    if (this.isBrowser) localStorage.removeItem('auth_user');
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
@@ -40,11 +43,12 @@ export class AuthService {
   isLoggedIn() { return !!this.currentUser(); }
 
   private saveUser(user: AuthUser) {
-    localStorage.setItem('auth_user', JSON.stringify(user));
+    if (this.isBrowser) localStorage.setItem('auth_user', JSON.stringify(user));
     this.currentUser.set(user);
   }
 
   private loadUser(): AuthUser | null {
+    if (!this.isBrowser) return null;
     const raw = localStorage.getItem('auth_user');
     if (!raw) return null;
     const user: AuthUser = JSON.parse(raw);
