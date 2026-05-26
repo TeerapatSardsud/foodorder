@@ -1,0 +1,119 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { BadgeModule } from 'primeng/badge';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { MenuItemService, MenuItem } from '../../core/services/menu-item.service';
+import { CartService } from '../../core/services/cart.service';
+
+@Component({
+  selector: 'app-menu',
+  standalone: true,
+  imports: [CommonModule, ButtonModule, BadgeModule, ToastModule],
+  providers: [MessageService],
+  template: `
+    <div class="p-4">
+
+      <!-- Header -->
+      <div class="flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="text-2xl font-bold m-0">Menu</h1>
+          <p class="text-color-secondary mt-1">เลือกรายการอาหารที่ต้องการ</p>
+        </div>
+        <p-button
+          icon="pi pi-shopping-cart"
+          label="ตะกร้า"
+          [badge]="(cartCount$ | async)?.toString() || '0'"
+          badgeSeverity="danger"
+          (onClick)="goCheckout()"
+          [disabled]="(cartCount$ | async) === 0">
+        </p-button>
+      </div>
+
+      <!-- Menu by category -->
+      <ng-container *ngFor="let cat of categories">
+        <h2 class="text-lg font-semibold mt-4 mb-2">{{ cat }}</h2>
+        <div class="grid">
+          <div class="col-12 md:col-6 lg:col-4"
+               *ngFor="let item of itemsByCategory[cat]">
+            <div class="surface-card border-round-lg border-1 surface-border p-3 flex flex-column gap-2 h-full">
+              <div class="flex justify-content-between align-items-start">
+                <span class="font-semibold text-base">{{ item.name }}</span>
+                <span class="text-primary font-bold">฿{{ item.price }}</span>
+              </div>
+              <p class="text-color-secondary text-sm m-0 flex-1">{{ item.description }}</p>
+              <div class="flex align-items-center justify-content-between mt-2">
+                <span class="text-xs surface-200 text-color-secondary border-round px-2 py-1">
+                  {{ item.category }}
+                </span>
+                <div class="flex align-items-center gap-1">
+                  <!-- quantity control if already in cart -->
+                  <ng-container *ngIf="getQty(item.id) > 0; else addBtn">
+                    <p-button icon="pi pi-minus" [text]="true" [rounded]="true" severity="secondary" size="small"
+                      (onClick)="decrease(item)"></p-button>
+                    <span class="font-bold mx-1">{{ getQty(item.id) }}</span>
+                    <p-button icon="pi pi-plus" [text]="true" [rounded]="true" severity="secondary" size="small"
+                      (onClick)="add(item)"></p-button>
+                  </ng-container>
+                  <ng-template #addBtn>
+                    <p-button icon="pi pi-plus" label="Add" size="small"
+                      (onClick)="add(item)"></p-button>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Empty -->
+      <div *ngIf="categories.length === 0" class="text-center py-8 text-color-secondary">
+        <i class="pi pi-spin pi-spinner text-4xl"></i>
+        <p class="mt-2">กำลังโหลดเมนู...</p>
+      </div>
+
+    </div>
+    <p-toast></p-toast>
+  `
+})
+export class MenuComponent implements OnInit {
+  private menuItemService = inject(MenuItemService);
+  private cartService     = inject(CartService);
+  private router          = inject(Router);
+  private toast           = inject(MessageService);
+
+  items: MenuItem[]                         = [];
+  itemsByCategory: Record<string, MenuItem[]> = {};
+  categories: string[]                      = [];
+  cartCount$ = this.cartService.count$;
+
+  ngOnInit() {
+    this.menuItemService.getAll().subscribe(items => {
+      this.items = items;
+      // จัดกลุ่มตาม category
+      this.itemsByCategory = items.reduce((acc, item) => {
+        (acc[item.category] ??= []).push(item);
+        return acc;
+      }, {} as Record<string, MenuItem[]>);
+      this.categories = Object.keys(this.itemsByCategory).sort();
+    });
+  }
+
+  getQty(id: number): number {
+    return this.cartService.snapshot.find(i => i.menuItem.id === id)?.quantity ?? 0;
+  }
+
+  add(item: MenuItem) {
+    this.cartService.add(item);
+    this.toast.add({ severity: 'success', summary: 'เพิ่มแล้ว', detail: item.name, life: 1500 });
+  }
+
+  decrease(item: MenuItem) {
+    const qty = this.getQty(item.id);
+    this.cartService.updateQty(item.id, qty - 1);
+  }
+
+  goCheckout() { this.router.navigate(['/checkout']); }
+}
