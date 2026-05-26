@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuItem } from 'primeng/api';
+import { CartService } from './core/services/cart.service';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
@@ -15,16 +16,18 @@ import { AuthService } from './core/services/auth.service';
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  auth = inject(AuthService);
+  private cartService = inject(CartService);
+  private authService = inject(AuthService);
+  cartCount$ = this.cartService.count$;
 
-  menuItems: MenuItem[] = [
-    { label: 'Menu',      icon: 'pi pi-fw pi-book', routerLink: ['/menu'] },
-    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
-    { label: 'Orders',    icon: 'pi pi-fw pi-list', routerLink: ['/orders'] },
-  ];
-
-  initials = computed(() => {
-    const name = this.auth.currentUser()?.fullName ?? '';
-    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  menuItems = computed<MenuItem[]>(() => {
+    const isAdmin = this.authService.isAdmin();
+    return [
+      { label: 'Menu',   icon: 'pi pi-fw pi-book', routerLink: ['/menu'] },
+      { label: 'Orders', icon: 'pi pi-fw pi-list', routerLink: ['/orders'] },
+      ...(isAdmin ? [
+        { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
+      ] : []),
+    ];
   });
 }
