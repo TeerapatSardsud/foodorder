@@ -50,15 +50,21 @@
     </div>
 
     <!-- Order info form -->
+    <form #checkoutForm="ngForm">
     <div class="surface-card border-round-lg border-1 surface-border mb-3 p-3 flex flex-column gap-3">
       <span class="font-semibold">ข้อมูลการสั่ง</span>
 
       <div class="field m-0">
-        <label class="font-medium block mb-1 text-sm">ประเภทออเดอร์</label>
+        <label class="font-medium block mb-1 text-sm">ประเภทออเดอร์ *</label>
         <p-dropdown [(ngModel)]="selectedOrderType"
+          name="orderType" required #orderType="ngModel"
           [options]="typeOptions" optionLabel="label" optionValue="value"
-          styleClass="w-full">
+          placeholder="เลือกประเภท" styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': orderType.invalid && orderType.touched}">
         </p-dropdown>
+        <small class="text-red-500" *ngIf="orderType.invalid && orderType.touched">
+          กรุณาเลือกประเภทออเดอร์
+        </small>
       </div>
 
       <div class="field m-0">
@@ -68,6 +74,7 @@
         </textarea>
       </div>
     </div>
+    </form>
 
     <!-- Submit -->
     <p-button
@@ -75,7 +82,8 @@
       icon="pi pi-check"
       styleClass="w-full"
       [loading]="submitting"
-      (onClick)="confirmOrder()">
+      [disabled]="checkoutForm.invalid"
+      (onClick)="confirmOrder(checkoutForm)">
     </p-button>
 
   </ng-container>

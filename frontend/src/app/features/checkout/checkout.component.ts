@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
@@ -29,7 +29,7 @@ export class CheckoutComponent implements OnInit {
   total = 0;
   typeOptions           = ORDER_TYPE_OPTIONS;
 
-  selectedOrderType = 0;
+  selectedOrderType: number | null = null;
   description       = '';
   submitting        = false;
 
@@ -54,14 +54,15 @@ export class CheckoutComponent implements OnInit {
 
   back() { this.router.navigate(['/menu']); }
 
-  confirmOrder() {
+  confirmOrder(form: NgForm) {
+    form.form.markAllAsTouched();
     const customerId = this.authService.currentUser()?.id;
-    if (!customerId) return;
+    if (form.invalid || !customerId) return;
     this.submitting = true;
 
     this.orderService.create({
       description: this.description || 'Order from menu',
-      orderType:   this.selectedOrderType,
+      orderType:   this.selectedOrderType!,
       customerId,
       items: this.cartItems.map(i => ({
         menuItemId: i.menuItem.id,
