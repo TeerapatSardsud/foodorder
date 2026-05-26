@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface DashboardSummary {
   totalOrders: number;
@@ -17,6 +18,6 @@ export interface DashboardSummary {
 export class DashboardService {
   private readonly http = inject(HttpClient);
   getSummary(): Observable<DashboardSummary> {
-    return this.http.get<DashboardSummary>('http://localhost:5000/api/dashboard/summary');
+    return this.http.get<DashboardSummary>(`${environment.apiUrl}/dashboard/summary`);
   }
 }

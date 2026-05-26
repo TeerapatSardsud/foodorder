@@ -3,6 +3,7 @@
 # ── .NET Backend ──────────────────────────────────────────────────────────────
 backend/*/bin/
 backend/*/obj/
+backend/*/appsettings.json
 *.db
 *.db-shm
 *.db-wal

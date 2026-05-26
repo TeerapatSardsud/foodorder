@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface MenuItem {
   id: number;
@@ -14,7 +15,7 @@ export interface MenuItem {
 @Injectable({ providedIn: 'root' })
 export class MenuItemService {
   private readonly http    = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:5000/api/menuitems';
+  private readonly baseUrl = `${environment.apiUrl}/menuitems`;
 
   getAll(): Observable<MenuItem[]> {
     return this.http.get<MenuItem[]>(this.baseUrl);
