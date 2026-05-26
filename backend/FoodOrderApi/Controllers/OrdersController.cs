@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FoodOrderApi.Data;
 using FoodOrderApi.DTOs;
 using FoodOrderApi.Models;
@@ -19,11 +20,17 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderResponse>>> GetAll()
     {
-        var orders = await _db.Orders
+        var userId   = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var isAdmin  = User.IsInRole("Admin");
+
+        var query = _db.Orders
             .Include(o => o.Customer)
             .Include(o => o.Items).ThenInclude(i => i.MenuItem)
-            .OrderByDescending(o => o.CreatedAt)
-            .ToListAsync();
+            .OrderByDescending(o => o.CreatedAt);
+
+        var orders = isAdmin
+            ? await query.ToListAsync()
+            : await query.Where(o => o.CustomerId == userId).ToListAsync();
 
         return Ok(orders.Select(MapToResponse));
     }
@@ -86,11 +93,15 @@ public class OrdersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<OrderResponse>> Update(int id, [FromBody] UpdateOrderRequest request)
     {
+        var userId  = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var isAdmin = User.IsInRole("Admin");
+
         var order = await _db.Orders
             .Include(o => o.Customer)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return NotFound();
+        if (!isAdmin && order.CustomerId != userId) return Forbid();
 
         if (string.IsNullOrWhiteSpace(request.Description))
             return BadRequest(new { error = "Description is required." });
@@ -107,8 +118,12 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
+        var userId  = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var isAdmin = User.IsInRole("Admin");
+
         var order = await _db.Orders.FindAsync(id);
         if (order == null) return NotFound();
+        if (!isAdmin && order.CustomerId != userId) return Forbid();
 
         _db.Orders.Remove(order);
         await _db.SaveChangesAsync();

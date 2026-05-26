@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+// top-level statements are async by default when await is used
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -55,32 +57,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-
-    if (!db.Users.Any(u => u.Role == "Admin"))
-    {
-        db.Users.Add(new FoodOrderApi.Models.User
-        {
-            FullName     = "Admin",
-            Email        = "admin@foodorder.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@1234"),
-            Role         = "Admin",
-            CreatedAt    = DateTime.UtcNow
-        });
-        db.SaveChanges();
-    }
-    if (!db.Users.Any(u => u.Role == "User"))
-    {
-        db.Users.Add(new FoodOrderApi.Models.User
-        {
-            FullName     = "User",
-            Email        = "user@foodorder.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("User@1234"),
-            Role         = "User",
-            CreatedAt    = DateTime.UtcNow
-        });
-        db.SaveChanges();
-    }
+    await DbSeeder.SeedAsync(db);
 }
 
 app.Run("http://localhost:5000");
