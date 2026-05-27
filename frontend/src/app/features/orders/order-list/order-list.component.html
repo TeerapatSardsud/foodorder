@@ -7,7 +7,15 @@
     <p-button *ngIf="!isAdmin" label="New Order" icon="pi pi-plus" (onClick)="openCreate()"></p-button>
   </div>
   
-  <p-table [value]="orders" [loading]="loading" [paginator]="true" [rows]="10" dataKey="id" styleClass="p-datatable-gridlines">
+  <div class="flex flex-wrap gap-2 mb-4">
+    <p-button [label]="'All (' + statusCounts['All'] + ')'" severity="secondary" [outlined]="currentStatusFilter !== 'All'" [rounded]="true" (onClick)="setFilter('All')"></p-button>
+    <p-button [label]="'Pending (' + statusCounts['Pending'] + ')'" severity="warning" [outlined]="currentStatusFilter !== 'Pending'" [rounded]="true" (onClick)="setFilter('Pending')"></p-button>
+    <p-button [label]="'Confirmed (' + statusCounts['Confirmed'] + ')'" severity="info" [outlined]="currentStatusFilter !== 'Confirmed'" [rounded]="true" (onClick)="setFilter('Confirmed')"></p-button>
+    <p-button [label]="'Delivered (' + statusCounts['Delivered'] + ')'" severity="success" [outlined]="currentStatusFilter !== 'Delivered'" [rounded]="true" (onClick)="setFilter('Delivered')"></p-button>
+    <p-button [label]="'Cancelled (' + statusCounts['Cancelled'] + ')'" severity="danger" [outlined]="currentStatusFilter !== 'Cancelled'" [rounded]="true" (onClick)="setFilter('Cancelled')"></p-button>
+  </div>
+  
+  <p-table [value]="filteredOrders" [loading]="loading" [paginator]="true" [rows]="10" dataKey="id" styleClass="p-datatable-gridlines">
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 4rem"></th>
@@ -33,6 +41,7 @@
         <td>฿{{ o.totalAmount | number:'1.2-2' }}</td>
         <td>{{ o.createdAt | date:'dd/MM/yy HH:mm' }}</td>
         <td>
+          
           <ng-container *ngIf="isAdmin && o.status === 'Pending'">
             <p-button icon="pi pi-check" severity="success" [text]="true" [rounded]="true" (onClick)="approveOrder(o)"></p-button>
             <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="rejectOrder(o)"></p-button>
@@ -44,13 +53,12 @@
           </ng-container>
           
           <span *ngIf="o.status !== 'Pending'" class="text-xs text-color-secondary font-italic">
-            cannot edit
+            Locked
           </span>
         </td>
       </tr>
     </ng-template>
 
-    <!-- Expanded Row Content showing Order Items -->
     <ng-template pTemplate="rowexpansion" let-o>
       <tr>
         <td colspan="8">
@@ -83,7 +91,7 @@
     </ng-template>
     
     <ng-template pTemplate="emptymessage">
-      <tr><td colspan="7" class="text-center py-5 text-color-secondary">No orders found.</td></tr>
+      <tr><td colspan="8" class="text-center py-5 text-color-secondary">No orders found.</td></tr>
     </ng-template>
   </p-table>
 </div>
