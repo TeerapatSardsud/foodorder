@@ -4,6 +4,8 @@ using FoodOrderApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FoodOrderApi.Controllers;
 
@@ -18,28 +20,33 @@ public class DashboardController : ControllerBase
     [HttpGet("summary")]
     public async Task<ActionResult<DashboardSummaryResponse>> GetSummary()
     {
-        var orders = await _db.Orders.ToListAsync();
+        var allOrders = await _db.Orders.ToListAsync();
 
-        var byStatus = orders
-            .GroupBy(o => o.Status.ToString())
-            .Select(g => new StatusCountDto { Status = g.Key, Count = g.Count() })
-            .ToList();
+        // 1. Get ONLY Confirmed orders
+        var confirmedOrders = allOrders.Where(o => o.Status == OrderStatus.Confirmed).ToList();
 
-        var byType = orders
-            .GroupBy(o => o.OrderType.ToString())
-            .Select(g => new TypeCountDto { Type = g.Key, Count = g.Count() })
-            .ToList();
-
-        return Ok(new DashboardSummaryResponse
+        var response = new DashboardSummaryResponse
         {
-            TotalOrders      = orders.Count,
-            PendingOrders    = orders.Count(o => o.Status == OrderStatus.Pending),
-            PreparingOrders  = orders.Count(o => o.Status == OrderStatus.Preparing),
-            DeliveredOrders  = orders.Count(o => o.Status == OrderStatus.Delivered),
-            CancelledOrders  = orders.Count(o => o.Status == OrderStatus.Cancelled),
-            TotalRevenue     = orders.Where(o => o.Status == OrderStatus.Delivered).Sum(o => o.TotalAmount),
-            OrdersByStatus   = byStatus,
-            OrdersByType     = byType
-        });
+            TotalOrders = confirmedOrders.Count, 
+            DeliveredOrders = confirmedOrders.Count(o => o.OrderType == OrderType.Delivery),
+            TotalRevenue = confirmedOrders.Sum(o => o.TotalAmount),
+
+            // Keep other statuses using allOrders so the dashboard still counts them correctly
+            PendingOrders = allOrders.Count(o => o.Status == OrderStatus.Pending),
+            PreparingOrders = allOrders.Count(o => o.Status == OrderStatus.Preparing),
+            CancelledOrders = allOrders.Count(o => o.Status == OrderStatus.Cancelled),
+
+            OrdersByStatus = allOrders
+                .GroupBy(o => o.Status)
+                .Select(g => new StatusCountDto { Status = g.Key.ToString(), Count = g.Count() })
+                .ToList(),
+
+            OrdersByType = allOrders
+                .GroupBy(o => o.OrderType)
+                .Select(g => new TypeCountDto { Type = g.Key.ToString(), Count = g.Count() })
+                .ToList()
+        };
+
+        return Ok(response);
     }
 }
