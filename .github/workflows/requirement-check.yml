@@ -1,0 +1,96 @@
+name: Full-Stack Requirement Check
+
+on:
+  push:
+    
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-checks:
+    name: Backend Requirements (C# API)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/FoodOrderApi
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' 
+
+    - name: Verify Build
+      run: dotnet build --configuration Release
+
+    - name: Requirement 1 - Use DTOs
+      run: |
+        if [ -d "DTOs" ] && [ "$(ls -A DTOs)" ]; then 
+          echo "✅ DTOs folder exists and is populated."
+        else 
+          echo "❌ Missing DTOs."
+          exit 1
+        fi
+
+    - name: Requirement 2 - Minimum 6 API Endpoints
+      run: |
+        ENDPOINT_COUNT=$(grep -riE '\[Http(Get|Post|Put|Delete)' Controllers/ | wc -l)
+        echo "Found $ENDPOINT_COUNT endpoints."
+        if [ "$ENDPOINT_COUNT" -lt 6 ]; then 
+          echo "❌ Need at least 6 endpoints!"
+          exit 1
+        else
+          echo "✅ Endpoint count requirement met."
+        fi
+
+    - name: Requirement 3 - Dashboard Summary API
+      run: |
+        if grep -q "DashboardController" Controllers/DashboardController.cs; then 
+          echo "✅ Dashboard summary API found."
+        else 
+          echo "❌ Dashboard summary API missing."
+          exit 1
+        fi
+
+  frontend-checks:
+    name: Frontend Requirements (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Verify Build
+      run: npm run build
+
+    - name: Requirement 4 - Angular Services
+      run: |
+        if ls src/app/core/services/*.ts 1> /dev/null 2>&1; then 
+          echo "✅ Angular services found."
+        else 
+          echo "❌ Services missing. Do not call HTTP directly from components."
+          exit 1
+        fi
+
+    - name: Requirement 5 - Angular Forms
+      run: |
+        if grep -riE 'FormBuilder|ngForm' src/app/features/; then 
+          echo "✅ Form validation (Reactive or Template-driven) found."
+        else 
+          echo "❌ Missing Angular form implementation."
+          exit 1
+        fi
