@@ -18,7 +18,7 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent {
   private cartService = inject(CartService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
   cartCount$ = this.cartService.count$;
 
   menuItems = computed<MenuItem[]>(() => {

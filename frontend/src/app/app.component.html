@@ -14,18 +14,18 @@
           {{ cartCount$ | async }}
         </span>
       </a>
-      <ng-container *ngIf="auth.isLoggedIn()">
+      <ng-container *ngIf="authService.isLoggedIn()">
         <div class="flex align-items-center gap-2">
           <p-avatar
             [label]="initials()"
             shape="circle"
-            [style]="{ background: auth.isAdmin() ? '#6366f1' : '#10b981', color: '#fff', width:'32px', height:'32px', fontSize:'13px' }"
+            [style]="{ background: authService.isAdmin() ? '#6366f1' : '#10b981', color: '#fff', width:'32px', height:'32px', fontSize:'13px' }"
           ></p-avatar>
           <div class="flex flex-column" style="line-height:1.2">
-            <span class="font-semibold text-sm">{{ auth.currentUser()?.fullName }}</span>
+            <span class="font-semibold text-sm">{{ authService.currentUser()?.fullName }}</span>
             <p-tag
-              [value]="auth.currentUser()?.role ?? ''"
-              [severity]="auth.isAdmin() ? 'warning' : 'info'"
+              [value]="authService.currentUser()?.role ?? ''"
+              [severity]="authService.isAdmin() ? 'warning' : 'info'"
               styleClass="text-xs"
             ></p-tag>
           </div>
@@ -36,7 +36,7 @@
           severity="secondary"
           [outlined]="true"
           size="small"
-          (onClick)="auth.logout()"
+          (onClick)="authService.logout()"
         ></p-button>
       </ng-container>
     </div>
