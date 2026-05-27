@@ -1,4 +1,3 @@
-```markdown
 # 🍔 Food Order System
 
 A full-stack food ordering platform built with **Angular 17** (PrimeNG) and **C# ASP.NET Core 8** (Entity Framework Core + SQLite).
@@ -51,6 +50,3 @@ ng serve
 
 * **App runs at:** `http://localhost:4200`
 
-```
-
-```
