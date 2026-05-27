@@ -1,135 +1,56 @@
+```markdown
 # 🍔 Food Order System
-> Full-Stack Challenge — Angular 17 + PrimeNG + C# ASP.NET Core 8 + EF Core + SQLite
+
+A full-stack food ordering platform built with **Angular 17** (PrimeNG) and **C# ASP.NET Core 8** (Entity Framework Core + SQLite).
 
 ---
 
-## 👥 Team Roles
+## ⚙️ How It Works
 
-| คน | Role | ความรับผิดชอบ |
-|----|------|----------------|
-| คนที่ 1 | Team Lead + Backend Core | Order CRUD API, EF Core, DB, Project setup |
-| คนที่ 2 | Backend Support | User API, MenuItem API, Dashboard, DTOs, Swagger |
-| คนที่ 3 | Frontend Core | Angular setup, PrimeNG, Order pages, Services |
-| คนที่ 4 | Frontend UI | Dashboard page, State management, Validation |
-| คนที่ 5 | Integration + QA | Wire frontend↔backend, Postman, CORS, README |
+This system provides a complete end-to-end flow for submitting and managing food orders:
 
----
-
-## 🗂️ Project Structure
-
-```
-food-order-system/
-├── backend/
-│   └── FoodOrderApi/
-│       ├── Controllers/
-│       │   ├── OrdersController.cs
-│       │   ├── UsersController.cs
-│       │   ├── MenuItemsController.cs
-│       │   └── DashboardController.cs
-│       ├── Models/
-│       │   ├── Order.cs
-│       │   ├── User.cs
-│       │   └── MenuItem.cs
-│       ├── DTOs/
-│       │   ├── OrderDto.cs
-│       │   └── DashboardSummaryDto.cs
-│       ├── Data/
-│       │   └── AppDbContext.cs
-│       ├── Services/
-│       │   └── OrderService.cs
-│       └── Program.cs
-└── frontend/
-    └── src/app/
-        ├── core/
-        │   └── services/
-        │       ├── order.service.ts
-        │       ├── user.service.ts
-        │       └── menu-item.service.ts
-        ├── features/
-        │   ├── orders/
-        │   │   ├── order-list/
-        │   │   └── order-form/
-        │   └── dashboard/
-        └── shared/components/
-```
+* **Customer Ordering:** Users can browse menu items, add them to their cart, and place an order (Delivery or Dine-in/Pickup).
+* **Admin Dashboard:** Administrators have a dedicated view to track real-time statistics, such as total revenue and the number of orders sorted by their current status.
+* **Order Lifecycle Management:** Admins can process orders by moving them through a realistic workflow: `Pending` → `Confirmed` → `Delivered` → `Cancelled`.
+* **Dynamic Filtering:** The frontend table allows users and admins to instantly filter orders by status without needing to refresh the page.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 How to Get Started
 
-### Backend (คนที่ 1 ทำก่อน)
+### Prerequisites
+Make sure you have the following installed on your machine:
+* **.NET 8 SDK** (for the backend)
+* **Node.js** v18 or v20 (for the frontend)
+* **Angular CLI**
+
+### 1. Start the Backend
+Open your terminal, navigate to the backend folder, set up the SQLite database, and run the server:
 
 ```bash
 cd backend/FoodOrderApi
 dotnet restore
 dotnet ef database update
 dotnet run
-# API runs at: https://localhost:7001
-# Swagger UI: https://localhost:7001/swagger
+
 ```
 
-### Frontend (คนที่ 3 ทำพร้อมกัน)
+* **API runs at:** `https://localhost:7001`
+* **Swagger UI Documentation:** `https://localhost:7001/swagger`
+
+### 2. Start the Frontend
+
+Open a **new** terminal window (leave the backend running), navigate to the frontend folder, install dependencies, and launch the web app:
 
 ```bash
 cd frontend
 npm install
 ng serve
-# App runs at: http://localhost:4200
+
 ```
 
----
+* **App runs at:** `http://localhost:4200`
 
-## 🔗 API Endpoints (6 required)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/orders` | List all orders |
-| POST | `/api/orders` | Create new order |
-| PUT | `/api/orders/{id}` | Update order |
-| DELETE | `/api/orders/{id}` | Delete order |
-| GET | `/api/users` | List all users |
-| GET | `/api/dashboard/summary` | Dashboard counts |
-| GET | `/api/menuitems` | List menu items (bonus) |
-
----
-
-## 📊 Data Model
-
-### Order
-```
-Id, OrderNumber, Description, Status, OrderType, CustomerId, CreatedAt, TotalAmount
 ```
 
-### User
 ```
-Id, FullName, Email, Role, CreatedAt
-```
-
-### MenuItem
-```
-Id, Name, Description, Price, Category, IsAvailable
-```
-
-### Order Status: Pending → Confirmed → Preparing → Ready → Delivered → Cancelled
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Angular 17, PrimeNG 17, TypeScript
-- **Backend**: ASP.NET Core 8, C#
-- **ORM**: Entity Framework Core 8
-- **Database**: SQLite (dev) / SQL Server (prod)
-- **API Docs**: Swagger / Postman
-- **Version Control**: Git + GitHub
-
----
-
-## 📅 Timeline
-
-| Week | Focus |
-|------|-------|
-| Week 1 | Setup repo, Backend models + API, Angular project init |
-| Week 2 | Frontend pages + Services, Connect to real API |
-| Week 3 | Dashboard, State management, Testing, Polish |
-# foodorder
