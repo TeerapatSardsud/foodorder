@@ -27,6 +27,14 @@ export class OrderListComponent implements OnInit {
   private router = inject(Router);
 
   orders: Order[] = [];
+
+  filteredOrders: Order[] = [];
+  currentStatusFilter = 'All';
+
+  statusCounts: Record<string, number> = {
+    All: 0, Pending: 0, Confirmed: 0, Delivered: 0, Cancelled: 0
+  };
+
   loading = false;
   dialogVisible = false;
   editing: Order | null = null;
@@ -38,9 +46,41 @@ export class OrderListComponent implements OnInit {
   load() {
     this.loading = true;
     this.orderService.getAll().subscribe({
-      next: d => { this.orders = d; this.loading = false; },
-      error: () => { this.toast.add({ severity:'error', summary:'Error', detail:'Cannot connect to backend' }); this.loading = false; }
+      next: d => { 
+        this.orders = d;
+        this.refreshData(); // Update counts and filter
+        this.loading = false; 
+      },
+      error: () => { 
+        this.toast.add({ severity:'error', summary:'Error', detail:'Cannot connect to backend' }); 
+        this.loading = false; 
+      }
     });
+  }
+
+  refreshData() {
+    // 1. Calculate the counts for each status
+    this.statusCounts = {
+      All: this.orders.length,
+      Pending: this.orders.filter(o => o.status === 'Pending').length,
+      Confirmed: this.orders.filter(o => o.status === 'Confirmed').length,
+      Delivered: this.orders.filter(o => o.orderType === 'Delivery' && o.status === 'Confirmed').length,
+      Cancelled: this.orders.filter(o => o.status === 'Cancelled').length
+    };
+    // 2. Apply the filter to the table
+    if (this.currentStatusFilter === 'All') {
+      this.filteredOrders = [...this.orders];
+    } else if (this.currentStatusFilter === 'Delivered') {
+      // Custom filter for Delivered
+      this.filteredOrders = this.orders.filter(o => o.status === 'Confirmed' && o.orderType === 'Delivery');
+    } else {
+      this.filteredOrders = this.orders.filter(o => o.status === this.currentStatusFilter);
+    }
+  }
+
+  setFilter(status: string) {
+    this.currentStatusFilter = status;
+    this.refreshData();
   }
 
   getSeverity(s: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
@@ -56,6 +96,7 @@ export class OrderListComponent implements OnInit {
     } else {
       this.orders = [o, ...this.orders];
     }
+    this.refreshData(); // Update counts
     this.dialogVisible = false;
     this.toast.add({ severity:'success', summary:'Saved', detail:`${o.orderNumber} saved` });
   }
@@ -65,7 +106,11 @@ export class OrderListComponent implements OnInit {
     this.confirm.confirm({
       message: `Delete order ${o.orderNumber}?`,
       accept: () => this.orderService.delete(o.id).subscribe({
-        next: () => { this.orders = this.orders.filter(x => x.id !== o.id); this.toast.add({ severity:'success', summary:'Deleted', detail:'Order removed' }); },
+        next: () => { 
+          this.orders = this.orders.filter(x => x.id !== o.id);
+          this.refreshData(); // Update counts
+          this.toast.add({ severity:'success', summary:'Deleted', detail:'Order removed' }); 
+        },
         error: () => this.toast.add({ severity:'error', summary:'Error', detail:'Delete failed' })
       })
     });
@@ -98,6 +143,7 @@ export class OrderListComponent implements OnInit {
         const i = this.orders.findIndex(x => x.id === o.id);
         if (i !== -1) this.orders[i] = updatedOrder;
         this.orders = [...this.orders];
+        this.refreshData(); // Update counts
         this.toast.add({ severity:'success', summary:'Success', detail:'Order status updated' }); 
       },
       error: () => this.toast.add({ severity:'error', summary:'Error', detail:'Failed to update status' })
