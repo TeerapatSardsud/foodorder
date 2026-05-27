@@ -18,11 +18,11 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent {
   private cartService = inject(CartService);
-  auth = inject(AuthService);
+  private authService = inject(AuthService);
   cartCount$ = this.cartService.count$;
 
   menuItems = computed<MenuItem[]>(() => {
-    const isAdmin = this.auth.isAdmin();
+    const isAdmin = this.authService.isAdmin();
     return [
       { label: 'Menu',   icon: 'pi pi-fw pi-book', routerLink: ['/menu'] },
       { label: 'Orders', icon: 'pi pi-fw pi-list', routerLink: ['/orders'] },
@@ -33,7 +33,7 @@ export class AppComponent {
   });
 
   initials = computed(() => {
-    const name = this.auth.currentUser()?.fullName ?? '';
+    const name = this.authService.currentUser()?.fullName ?? '';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   });
 }
