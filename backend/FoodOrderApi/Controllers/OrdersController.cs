@@ -102,6 +102,8 @@ public class OrdersController : ControllerBase
 
         if (order == null) return NotFound();
         if (!isAdmin && order.CustomerId != userId) return Forbid();
+        if (!isAdmin && order.Status != OrderStatus.Pending) 
+            return BadRequest(new { error = "You can only edit pending orders." });
 
         if (string.IsNullOrWhiteSpace(request.Description))
             return BadRequest(new { error = "Description is required." });
@@ -124,6 +126,8 @@ public class OrdersController : ControllerBase
         var order = await _db.Orders.FindAsync(id);
         if (order == null) return NotFound();
         if (!isAdmin && order.CustomerId != userId) return Forbid();
+        if (!isAdmin && order.Status != OrderStatus.Pending) 
+            return BadRequest(new { error = "You can only edit pending orders." });
 
         _db.Orders.Remove(order);
         await _db.SaveChangesAsync();
