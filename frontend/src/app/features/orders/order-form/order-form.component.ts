@@ -6,6 +6,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ButtonModule } from 'primeng/button';
 import { OrderService, Order, ORDER_STATUS_OPTIONS, ORDER_TYPE_OPTIONS, CreateOrderRequest, UpdateOrderRequest } from '../../../core/services/order.service';
 import { UserService, User } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-order-form',
@@ -21,14 +22,16 @@ export class OrderFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private orderService = inject(OrderService);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   form!: FormGroup;
   customers: User[] = [];
   saving = false;
   statusOptions = ORDER_STATUS_OPTIONS;
   typeOptions = ORDER_TYPE_OPTIONS;
+  isAdmin = this.authService.isAdmin();
 
-ngOnInit() {
+  ngOnInit() {
   this.userService.getAll().subscribe(u => this.customers = u);
 
   const statusVal = this.order

@@ -4,16 +4,28 @@
       <h1 class="text-2xl font-bold m-0">Orders</h1>
       <p class="text-color-secondary mt-1">Manage all food orders</p>
     </div>
-    <p-button label="New Order" icon="pi pi-plus" (onClick)="openCreate()"></p-button>
+    <p-button *ngIf="!isAdmin" label="New Order" icon="pi pi-plus" (onClick)="openCreate()"></p-button>
   </div>
+  
   <p-table [value]="orders" [loading]="loading" [paginator]="true" [rows]="10" dataKey="id" styleClass="p-datatable-gridlines">
     <ng-template pTemplate="header">
       <tr>
-        <th>Order #</th><th>Customer</th><th>Type</th><th>Status</th><th>Total</th><th>Date</th><th>Actions</th>
+        <th style="width: 4rem"></th>
+        <th>Order #</th>
+        <th>Customer</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Date</th>
+        <th>Actions</th>
       </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-o>
+    
+    <ng-template pTemplate="body" let-o let-expanded="expanded">
       <tr>
+        <td>
+          <button type="button" pButton pRipple [pRowToggler]="o" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+        </td>
         <td><span class="font-semibold">{{ o.orderNumber }}</span></td>
         <td>{{ o.customerName }}</td>
         <td><p-tag [value]="o.orderType" severity="info"></p-tag></td>
@@ -21,18 +33,61 @@
         <td>฿{{ o.totalAmount | number:'1.2-2' }}</td>
         <td>{{ o.createdAt | date:'dd/MM/yy HH:mm' }}</td>
         <td>
-          <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true" (onClick)="openEdit(o)"></p-button>
-          <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (onClick)="confirmDelete(o)"></p-button>
+          
+          <ng-container *ngIf="isAdmin && o.status === 'Pending'">
+            <p-button icon="pi pi-check" severity="success" [text]="true" [rounded]="true" (onClick)="approveOrder(o)"></p-button>
+            <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="rejectOrder(o)"></p-button>
+          </ng-container>
+
+          <ng-container *ngIf="!isAdmin">
+            <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true" (onClick)="openEdit(o)"></p-button>
+            <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (onClick)="confirmDelete(o)"></p-button>
+          </ng-container>
+
         </td>
       </tr>
     </ng-template>
+
+    <!-- Expanded Row Content showing Order Items -->
+    <ng-template pTemplate="rowexpansion" let-o>
+      <tr>
+        <td colspan="8">
+          <div class="p-3 surface-ground border-round">
+            <h5 class="mt-0 mb-3">Order Items</h5>
+            <p-table [value]="o.items" dataKey="menuItemId">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Item Name</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr>
+                  <td>{{ item.menuItemName }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>฿{{ item.unitPrice | number:'1.2-2' }}</td>
+                  <td class="font-semibold">฿{{ (item.quantity * item.unitPrice) | number:'1.2-2' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr><td colspan="4" class="text-color-secondary">No items found for this order.</td></tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    
     <ng-template pTemplate="emptymessage">
-      <tr><td colspan="7" class="text-center py-5 text-color-secondary">No orders yet. Create your first order!</td></tr>
+      <tr><td colspan="7" class="text-center py-5 text-color-secondary">No orders found.</td></tr>
     </ng-template>
   </p-table>
 </div>
+
 <p-dialog [(visible)]="dialogVisible" [header]="editing ? 'Edit Order' : 'New Order'" [modal]="true" [style]="{width:'480px'}" [draggable]="false">
-  <app-order-form [order]="editing" (saved)="onSaved($event)" (cancelled)="dialogVisible=false"></app-order-form>
+  <app-order-form *ngIf="dialogVisible" [order]="editing" (saved)="onSaved($event)" (cancelled)="dialogVisible=false"></app-order-form>
 </p-dialog>
 <p-confirmDialog></p-confirmDialog>
 <p-toast></p-toast>

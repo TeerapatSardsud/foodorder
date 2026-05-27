@@ -2,6 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
+import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
@@ -12,7 +13,7 @@ import { AuthService } from './core/services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, MenubarModule, ButtonModule, TagModule, AvatarModule],
+  imports: [CommonModule, RouterModule, MenubarModule, BadgeModule, ButtonModule, TagModule, AvatarModule],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -29,5 +30,10 @@ export class AppComponent {
         { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
       ] : []),
     ];
+  });
+
+  initials = computed(() => {
+    const name = this.authService.currentUser()?.fullName ?? '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   });
 }
