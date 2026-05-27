@@ -33,17 +33,19 @@
         <td>฿{{ o.totalAmount | number:'1.2-2' }}</td>
         <td>{{ o.createdAt | date:'dd/MM/yy HH:mm' }}</td>
         <td>
-          
           <ng-container *ngIf="isAdmin && o.status === 'Pending'">
             <p-button icon="pi pi-check" severity="success" [text]="true" [rounded]="true" (onClick)="approveOrder(o)"></p-button>
             <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="rejectOrder(o)"></p-button>
           </ng-container>
 
-          <ng-container *ngIf="!isAdmin">
+          <ng-container *ngIf="!isAdmin && o.status === 'Pending'">
             <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true" (onClick)="openEdit(o)"></p-button>
             <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (onClick)="confirmDelete(o)"></p-button>
           </ng-container>
-
+          
+          <span *ngIf="o.status !== 'Pending'" class="text-xs text-color-secondary font-italic">
+            cannot edit
+          </span>
         </td>
       </tr>
     </ng-template>
