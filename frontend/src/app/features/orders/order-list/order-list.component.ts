@@ -10,6 +10,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { OrderService, Order, STATUS_SEVERITY, ORDER_TYPE_OPTIONS, UpdateOrderRequest } from '../../../core/services/order.service';
 import { OrderFormComponent } from '../order-form/order-form.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-order-list',
@@ -23,6 +24,7 @@ export class OrderListComponent implements OnInit {
   private confirm = inject(ConfirmationService);
   private toast = inject(MessageService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   orders: Order[] = [];
   loading = false;
@@ -43,7 +45,7 @@ export class OrderListComponent implements OnInit {
 
   getSeverity(s: string): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
   return (STATUS_SEVERITY[s] as 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast') ?? 'secondary';}  
-  openCreate() { this.editing = null; this.dialogVisible = true; }
+  openCreate() { this.router.navigate(['/menu']); }
   openEdit(o: Order) { this.editing = { ...o }; this.dialogVisible = true; }
 
   onSaved(o: Order) {
